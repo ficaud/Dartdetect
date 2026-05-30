@@ -16,7 +16,6 @@ pub enum SensorPos {
 
 /// Sensor position and point struct definitions, along with helper methods to access the point data from the sensor positions.
 impl SensorPos {
-
     /// Helper method to retrieve the `Point` associated with a given `SensorPos` variant.
     ///
     /// This method allows for easy access to the coordinates of the sensor positions when calculating distances or simulating impacts.
