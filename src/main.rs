@@ -3,13 +3,13 @@ mod dart_calculator;
 use crate::dart_calculator::*;
 mod dart_interpretor;
 use crate::dart_interpretor::score::Score;
+use std::time::Instant;
 
 fn main() {
 
     // =================================================================
     // Step 1: Initialize the sensors and the impact point (simulation)
     // =================================================================
-    
     // Init the sensors position
     let sensors = [
         SensorPos::C1(Point::new(0.0, 500.0)),
@@ -18,7 +18,9 @@ fn main() {
         SensorPos::C4(Point::new(0.0, 0.0)),
     ];
 
-    let impact_point: Point = Point::new(250.0, 420.0);
+    let impact_point: Point = Point::new(250.0, 355.0);
+
+    let processing_start = Instant::now();
 
     // Simulate the impact and get the actual distances from the sensors
     let baseline_time_us = 1_000.0;
@@ -63,5 +65,9 @@ fn main() {
     // Step 5 : TODO - move on the to rest of the game logic
     // =================================================================
 
-    println!("Score: {}", score.get_score());
+    let score_value = score.get_score();
+    let processing_time = processing_start.elapsed();
+
+    println!("Score: {}", score_value);
+    println!("Processing time until score: {:?}", processing_time);
 }
