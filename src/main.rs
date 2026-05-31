@@ -38,6 +38,7 @@ fn main() {
 
     let impact_point: Point = Point::new(250.0, 355.0);
 
+    // Start the processing timer
     let processing_start = Instant::now();
 
     // Simulate the impact and get the actual distances from the sensors
@@ -61,9 +62,7 @@ fn main() {
 
     // Get the reached impact point from the locator
     let reached_impact = locator.locate();
-
     println!("Reached impact point: {:?}", reached_impact);
-
 
     match reached_impact {
         Some(point) => {
@@ -82,7 +81,6 @@ fn main() {
     // =================================================================
     // Step 5 : TODO - move on the to rest of the game logic
     // =================================================================
-
     let score_value = score.get_score();
     let processing_time = processing_start.elapsed();
 

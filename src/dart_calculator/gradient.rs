@@ -35,15 +35,15 @@ impl Gradient {
         self.alpha = alpha;
     }
 
-    pub fn get_epsilon(&self) -> f64 {
+    pub fn _get_epsilon(&self) -> f64 {
         self.epsilon
     }
 
-    pub fn set_epsilon(&mut self, epsilon: f64) {
+    pub fn _set_epsilon(&mut self, epsilon: f64) {
         self.epsilon = epsilon;
     }
 
-    pub fn set_probe_point(&mut self, x: f64, y: f64) {
+    pub fn _set_probe_point(&mut self, x: f64, y: f64) {
         let point = Point::new(x, y);
         self.x_epsilon = point;
         self.y_epsilon = point;
@@ -146,7 +146,7 @@ mod tests {
         ];
 
         let mut gradient = Gradient::new(0.1, 1.0, sensors);
-        gradient.set_probe_point(250.0, 250.0);
+        gradient._set_probe_point(250.0, 250.0);
 
         let actual_distances = gradient.get_distances(gradient.x_epsilon);
         let error = gradient.calculate_error(gradient.x_epsilon, &actual_distances);
@@ -171,7 +171,7 @@ mod tests {
         
         let mut gradient = Gradient::new(0.1, 20.0, sensors);
 
-        gradient.set_probe_point(first_guess.x, first_guess.y);
+        gradient._set_probe_point(first_guess.x, first_guess.y);
         let base_error = gradient.calculate_error(first_guess, &actual_distances);
         let (gradient_x, gradient_y) = gradient.calculate_gradient(&actual_distances, first_guess.x, first_guess.y);
         let error_x = gradient.calculate_error(gradient.x_epsilon, &actual_distances);
