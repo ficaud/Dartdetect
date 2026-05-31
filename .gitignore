@@ -1,1 +1,7 @@
+/.DS_Store
 /target
+/dart_engine/target
+/dart_server/target
+/dart_ui/node_modules
+/dart_ui/dist
+dart_simu_cli/target

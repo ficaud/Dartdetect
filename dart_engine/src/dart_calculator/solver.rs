@@ -219,6 +219,14 @@ impl Solver {
             Point::new(250.0, 375.0),
             Point::new(125.0, 250.0),
             Point::new(375.0, 250.0),
+            Point::new(0.0, 0.0),
+            Point::new(0.0, 500.0),
+            Point::new(500.0, 0.0),
+            Point::new(500.0, 500.0),
+            Point::new(250.0, 0.0),
+            Point::new(250.0, 500.0),
+            Point::new(0.0, 250.0),
+            Point::new(500.0, 250.0),
         ];
         // Limit the number of iterations per starting point to prevent infinite loops in case of convergence issues.
         let max_iterations_per_start = 5_000_u32;
