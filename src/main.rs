@@ -1,13 +1,33 @@
+mod dart_core;
 mod dart_calculator;
-
 use crate::dart_calculator::*;
+mod dart_interpretor;
+use crate::dart_interpretor::score::Score;
+use std::time::Instant;
+
+
+// ----------------------------------------------------------------
+// Solver performance notes
+//
+// Test case:
+// Simulated impact point = { x: 250.0, y: 355.0 }
+// Expected score = triple 20
+//
+// Baseline solver without gradient descent:
+// Iterations: 125_606
+// Processing time: 36.19 ms
+//
+// Solver with gradient descent:
+// Iterations: 13
+// Processing time: 297.125 us
+// ----------------------------------------------------------------
+
 
 fn main() {
 
     // =================================================================
     // Step 1: Initialize the sensors and the impact point (simulation)
     // =================================================================
-    
     // Init the sensors position
     let sensors = [
         SensorPos::C1(Point::new(0.0, 500.0)),
@@ -16,7 +36,10 @@ fn main() {
         SensorPos::C4(Point::new(0.0, 0.0)),
     ];
 
-    let impact_point = Point::new(50.0, 230.0);
+    let impact_point: Point = Point::new(250.0, 355.0);
+
+    // Start the processing timer
+    let processing_start = Instant::now();
 
     // Simulate the impact and get the actual distances from the sensors
     let baseline_time_us = 1_000.0;
@@ -39,9 +62,7 @@ fn main() {
 
     // Get the reached impact point from the locator
     let reached_impact = locator.locate();
-
     println!("Reached impact point: {:?}", reached_impact);
-
 
     match reached_impact {
         Some(point) => {
@@ -54,4 +75,15 @@ fn main() {
     // =================================================================
     // Step 3: Estimate the amount of points scored
     // =================================================================
+    let point = reached_impact.expect("solver did not find an impact point");
+    let mut score = Score::new(point);
+
+    // =================================================================
+    // Step 5 : TODO - move on the to rest of the game logic
+    // =================================================================
+    let score_value = score.get_score();
+    let processing_time = processing_start.elapsed();
+
+    println!("Score: {}", score_value);
+    println!("Processing time until score: {:?}", processing_time);
 }

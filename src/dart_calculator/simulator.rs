@@ -55,7 +55,7 @@ impl DistanceCalculation for ImpactSimulator {
     /// - self: The `ImpactSimulator` instance containing the simulated timings for each sensor.
     /// 
     /// This function return the four distances in millimeters corresponding to the timings of the sensors
-    fn get_distances(&self) -> Self::Output {
+    fn get_distances(&self, _point: Point) -> Self::Output {
         // First get the delta value from the timiings finding the minimum timing and then subtracting it from all the timings
         let min_time = self.t1.min(self.t2).min(self.t3).min(self.t4);
         let delta_t1 = self.t1 - min_time;
