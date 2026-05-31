@@ -1,3 +1,5 @@
+use crate::dart_core::Point;
+
 /// Defines the `DistanceCalculation` trait, which provides a method to calculate distances
 ///
 /// This trait is used by various structs to implement the logic for calculating distances based on 
@@ -5,5 +7,5 @@
 pub trait DistanceCalculation {
     type Output;
 
-    fn get_distances(&self) -> Self::Output;
+    fn get_distances(&self, point: Point) -> Self::Output;
 }

@@ -5,6 +5,24 @@ mod dart_interpretor;
 use crate::dart_interpretor::score::Score;
 use std::time::Instant;
 
+
+// ----------------------------------------------------------------
+// Solver performance notes
+//
+// Test case:
+// Simulated impact point = { x: 250.0, y: 355.0 }
+// Expected score = triple 20
+//
+// Baseline solver without gradient descent:
+// Iterations: 125_606
+// Processing time: 36.19 ms
+//
+// Solver with gradient descent:
+// Iterations: 13
+// Processing time: 297.125 us
+// ----------------------------------------------------------------
+
+
 fn main() {
 
     // =================================================================
