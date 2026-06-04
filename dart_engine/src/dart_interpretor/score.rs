@@ -1,4 +1,5 @@
 use crate::dart_core::Point;
+use crate::dart_game::game::ShotResult;
 use super::multiplicator::multiplier_from_radius;
 use super::zone::sector_from_angle;
 
@@ -75,12 +76,42 @@ impl Score {
 
         self.points
     }
+
+    /// Compute a `ShotResult` (sector + multiplier) from the impact coordinates.
+    ///
+    /// This is the bridge between the score interpreter and the game engine:
+    /// the returned `ShotResult` can be fed directly into `GameSession::apply_shot()`.
+    pub fn get_shortresult(&mut self) -> ShotResult {
+        let centered = self.centered_coordinates();
+        let radius = (centered.x.powi(2) + centered.y.powi(2)).sqrt();
+
+        if radius <= DOUBLE_BULL_RADIUS {
+            self.points = 50;
+            return ShotResult { sector: 25, multiplier: 2 };
+        }
+
+        if radius <= SINGLE_BULL_RADIUS {
+            self.points = 25;
+            return ShotResult { sector: 25, multiplier: 1 };
+        }
+
+        let multiplier = multiplier_from_radius(radius as f32);
+        let zone = sector_from_angle(self.board_angle());
+
+        self.points = multiplier * u32::from(zone);
+
+        ShotResult {
+            sector: zone as u32,
+            multiplier,
+        }
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::Score;
     use crate::dart_core::Point;
+    use crate::dart_game::game::ShotResult;
 
     #[test]
     fn double_bull_scores_fifty() {
@@ -115,5 +146,52 @@ mod tests {
         let mut score = Score::new(Point::new(480.0, 250.0));
 
         assert_eq!(score.get_score(), 0);
+    }
+
+    // ─── get_shortresult tests ──────────────────────
+
+    #[test]
+    fn double_bull_shotresult() {
+        let mut score = Score::new(Point::new(250.0, 250.0));
+        let result = score.get_shortresult();
+
+        assert_eq!(result, ShotResult { sector: 25, multiplier: 2 });
+        assert_eq!(score.points, 50);
+    }
+
+    #[test]
+    fn single_bull_shotresult() {
+        let mut score = Score::new(Point::new(260.0, 250.0));
+        let result = score.get_shortresult();
+
+        assert_eq!(result, ShotResult { sector: 25, multiplier: 1 });
+        assert_eq!(score.points, 25);
+    }
+
+    #[test]
+    fn top_single_shotresult() {
+        let mut score = Score::new(Point::new(250.0, 300.0));
+        let result = score.get_shortresult();
+
+        assert_eq!(result, ShotResult { sector: 20, multiplier: 1 });
+        assert_eq!(score.points, 20);
+    }
+
+    #[test]
+    fn right_triple_shotresult() {
+        let mut score = Score::new(Point::new(350.0, 250.0));
+        let result = score.get_shortresult();
+
+        assert_eq!(result, ShotResult { sector: 6, multiplier: 3 });
+        assert_eq!(score.points, 18);
+    }
+
+    #[test]
+    fn outside_board_shotresult() {
+        let mut score = Score::new(Point::new(480.0, 250.0));
+        let result = score.get_shortresult();
+
+        assert_eq!(result, ShotResult { sector: 6, multiplier: 0 });
+        assert_eq!(score.points, 0);
     }
 }
