@@ -198,7 +198,7 @@
     <div class="visuals">
         <figure class="board-panel">
           <svg
-            aria-label={payload ? `Dart impact at x ${payload.impact_x} and y ${payload.impact_y}` : 'Dartboard'}
+            aria-label={payload ? `Score ${payload.score}` : 'Dartboard'}
             class="dartboard"
             role="img"
             viewBox="0 0 500 500"

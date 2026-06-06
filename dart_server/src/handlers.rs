@@ -7,7 +7,8 @@ use axum::{
     response::IntoResponse,
     Json,
 };
-use dartdectec::dart_game::{ScorePayload, game::GameSession, x01::X01};
+use dartdectec::dart_game::{game::GameSession, x01::X01};
+use crate::runtime::ScorePayload;
 use serde::Serialize;
 use std::{
     fmt::Debug, sync::{
@@ -82,11 +83,13 @@ pub(crate) async fn start_game_handler(
         params.players_count, params.starting_score
     );
 
+    // Create new game session with generated player names
     let session = GameSession::new(
         X01::new(params.starting_score, false),
         (1..=params.players_count).map(|i| format!("Player {}", i)).collect(),
     );
 
+    // Update active game in runtime state
     *state.runtime.active_game.write().await = Some(session);
 
     Ok(StatusCode::OK)

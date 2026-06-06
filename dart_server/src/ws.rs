@@ -9,6 +9,7 @@ use crate::handlers::emit_event;
 use dartdectec::dart_core::Point;
 use dartdectec::dart_game::{self, game::GameSession, x01::X01};
 use dartdectec::dart_interpretor::score::Score;
+use dartdectec::dart_simulation::pipeline;
 
 fn game_state_from_session(session: &GameSession<X01>) -> GameStatePayload {
     GameStatePayload {
@@ -68,13 +69,19 @@ pub(crate) async fn ws_connection(socket: WebSocket, state: AppState) {
                             tracing::debug!("[WS] parsing coordinates: x={}, y={}", x, y);
                             let impact_point = Point::new(x, y);
 
-                            match dart_game::calculate_score_for_impact_point(impact_point) {
-                                Ok(payload) => {
+                            match pipeline::calculate_score_for_impact_point(impact_point) {
+                                Ok(score) => {
+                                    let score_payload = crate::runtime::ScorePayload {
+                                        impact_x: x,
+                                        impact_y: y,
+                                        score,
+                                    };
+
                                     // Save latest score
                                     {
                                         let mut latest =
                                             runtime_for_receive.latest_score.write().await;
-                                        *latest = Some(payload.clone());
+                                        *latest = Some(score_payload.clone());
                                     }
 
                                     // Check if a game is active
@@ -85,10 +92,7 @@ pub(crate) async fn ws_connection(socket: WebSocket, state: AppState) {
                                     if has_game {
                                         // Derive ShotResult from the impact coordinates
                                         let shot_result = {
-                                            let mut score = Score::new(Point::new(
-                                                payload.impact_x,
-                                                payload.impact_y,
-                                            ));
+                                            let mut score = Score::new(Point::new(x, y));
                                             let sr = score.get_shortresult();
                                             tracing::debug!(
                                                 "[WS] derived ShotResult: sector={}, multiplier={}",
@@ -144,7 +148,7 @@ pub(crate) async fn ws_connection(socket: WebSocket, state: AppState) {
                                         // Always emit Score so the frontend updates the impact dot
                                         emit_event(
                                             &runtime_for_receive,
-                                            ServerEvent::Score(payload),
+                                            ServerEvent::Score(score_payload),
                                         );
                                         if let Some(state) = &game_state {
                                             tracing::info!(
@@ -175,7 +179,7 @@ pub(crate) async fn ws_connection(socket: WebSocket, state: AppState) {
                                         tracing::debug!("[WS] no active game, broadcasting raw score");
                                         emit_event(
                                             &runtime_for_receive,
-                                            ServerEvent::Score(payload),
+                                            ServerEvent::Score(score_payload),
                                         );
                                     }
                                 }
