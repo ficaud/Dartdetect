@@ -1,38 +1,15 @@
-use crate::runtime::{AppState, ServerEvent, GameStatePayload, PlayerState};
+use crate::runtime::{AppState, ServerEvent, GameStatePayload};
 use futures_util::{SinkExt, StreamExt};
 use serde_json;
 use std::{sync::Arc};
 use axum::extract::ws::{Message, WebSocket};
 
-use crate::handlers::status_from_runtime;
-use crate::handlers::emit_event;
+use crate::handlers::{status_from_runtime, emit_event, game_state_from_session};
 use dartdectec::dart_core::Point;
-use dartdectec::dart_game::{self, game::GameSession, x01::X01};
+use dartdectec::dart_game;
 use dartdectec::dart_interpretor::score::Score;
 use dartdectec::dart_simulation::pipeline;
 
-fn game_state_from_session(session: &GameSession<X01>) -> GameStatePayload {
-    GameStatePayload {
-        players: session
-            .players
-            .iter()
-            .map(|p| PlayerState {
-                name: p.name.clone(),
-                score: p.data,
-            })
-            .collect(),
-        current_player: session.current_player,
-        current_dart: session.current_dart,
-        phase: match session.phase {
-            dartdectec::dart_game::game::GamePhase::Playing => "playing".into(),
-            dartdectec::dart_game::game::GamePhase::Finished(w) => format!("finished:{}", w),
-        },
-        winner: match session.phase {
-            dartdectec::dart_game::game::GamePhase::Finished(w) => Some(w),
-            _ => None,
-        },
-    }
-}
 #[derive(serde::Deserialize, Debug)]
 struct ClientCommand {
     x_pos: Option<f64>,

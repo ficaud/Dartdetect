@@ -18,7 +18,9 @@ use std::{
 
 use crate::{
     error::ApiError,
-    runtime::{AppState, ServerEvent, SimulationRuntime, StatusPayload},
+    runtime::{
+        AppState, GameStatePayload, PlayerState, ServerEvent, SimulationRuntime, StatusPayload,
+    },
 };
 use crate::ws::{ws_connection};
 
@@ -43,6 +45,29 @@ pub(crate) fn status_from_runtime(runtime: &SimulationRuntime) -> StatusPayload 
 }
 pub(crate) fn emit_event(runtime: &SimulationRuntime, event: ServerEvent) {
     let _ = runtime.events_tx.send(event);
+}
+
+pub(crate) fn game_state_from_session(session: &GameSession<X01>) -> GameStatePayload {
+    GameStatePayload {
+        players: session
+            .players
+            .iter()
+            .map(|p| PlayerState {
+                name: p.name.clone(),
+                score: p.data,
+            })
+            .collect(),
+        current_player: session.current_player,
+        current_dart: session.current_dart,
+        phase: match session.phase {
+            dartdectec::dart_game::game::GamePhase::Playing => "playing".into(),
+            dartdectec::dart_game::game::GamePhase::Finished(w) => format!("finished:{}", w),
+        },
+        winner: match session.phase {
+            dartdectec::dart_game::game::GamePhase::Finished(w) => Some(w),
+            _ => None,
+        },
+    }
 }
 
 pub(crate) async fn health_handler() -> Json<HealthResponse> {
@@ -88,6 +113,10 @@ pub(crate) async fn start_game_handler(
         X01::new(params.starting_score, false),
         (1..=params.players_count).map(|i| format!("Player {}", i)).collect(),
     );
+
+    // Build game state payload and broadcast to all WS clients
+    let game_state = game_state_from_session(&session);
+    emit_event(&state.runtime, ServerEvent::GameState(game_state.clone()));
 
     // Update active game in runtime state
     *state.runtime.active_game.write().await = Some(session);

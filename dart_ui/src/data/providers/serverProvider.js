@@ -72,6 +72,14 @@ export function createServerProvider(options = {}) {
           if (parsed.type === 'status' && handlers.onStatus) {
             handlers.onStatus(parsed.payload);
           }
+
+          if (parsed.type === 'game_state' && handlers.onGameState) {
+            handlers.onGameState(parsed.payload);
+          }
+
+          if (parsed.type === 'game_over' && handlers.onGameOver) {
+            handlers.onGameOver(parsed.payload);
+          }
         } catch (error) {
           if (handlers.onError) {
             handlers.onError(String(error));

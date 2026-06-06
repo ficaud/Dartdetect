@@ -5,6 +5,7 @@
   let loading = true;
   let errorMessage = '';
   let payload = null;
+  let gameState = null;
   let appVersion = 'loading...';
   let provider = null;
   let unsubscribeProvider = null;
@@ -82,6 +83,14 @@
         errorMessage = String(message);
       },
       onStatus: () => {},
+      onGameState: (state) => {
+        gameState = state;
+        loading = false;
+        errorMessage = '';
+      },
+      onGameOver: ({ winner_index, winner_name }) => {
+        console.log(`🏆 ${winner_name} wins!`);
+      },
     });
 
     // try to load the latest score from the server (e.g. after a page refresh)
@@ -234,7 +243,16 @@
           </svg>
         </figure>
 
-        {#if payload}
+        {#if gameState}
+        <div class="player-scores">
+          {#each gameState.players as player, i}
+          <div class="player-score {i === gameState.current_player ? 'active' : ''}">
+            <span class="player-name">{player.name}</span>
+            <span class="player-remaining">{player.score}</span>
+          </div>
+          {/each}
+        </div>
+        {:else if payload}
         <p class="live-score">Score: <strong>{payload.score}</strong></p>
         {/if}
       </div>
