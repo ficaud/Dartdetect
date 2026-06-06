@@ -99,9 +99,15 @@
     }
   }
 
-  function startGame() {
+  async function startGame() {
     // placeholder — will launch the game view
-    console.log('Game started', { playersCount, startingScore });
+    if (provider && typeof provider.startGame === 'function') {
+      try {
+        await provider.startGame({ playersCount, startingScore });
+      } catch (error) {
+        console.error('Failed to start game:', error);
+      }
+    }
   }
 
   onMount(() => {

@@ -5,3 +5,4 @@
 /dart_ui/node_modules
 /dart_ui/dist
 dart_simu_cli/target
+dart_ui/.vite

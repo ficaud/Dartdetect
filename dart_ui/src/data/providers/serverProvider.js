@@ -95,5 +95,13 @@ export function createServerProvider(options = {}) {
     async getVersion() {
       return request('/version');
     },
+
+    async startGame(gameConfig) {
+      return request('/api/game/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(gameConfig)
+      });
+    }
   };
 }

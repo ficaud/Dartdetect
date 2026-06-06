@@ -1,8 +1,8 @@
-use dartdectec::dart_game::ScorePayload;
+use dartdectec::dart_game::{game::GameSession, x01::X01, ScorePayload};
 use serde::Serialize;
 use std::sync::{
     Arc,
-    atomic::{AtomicBool, AtomicU64},
+    atomic::AtomicBool,
 };
 use tokio::sync::{RwLock, broadcast};
 
@@ -13,8 +13,8 @@ pub(crate) struct AppState {
 
 pub(crate) struct SimulationRuntime {
     pub(crate) running: AtomicBool,
-    pub(crate) interval_ms: AtomicU64,
     pub(crate) latest_score: RwLock<Option<ScorePayload>>,
+    pub(crate) active_game: RwLock<Option<GameSession<X01>>>,
     pub(crate) events_tx: broadcast::Sender<ServerEvent>,
 }
 
@@ -23,8 +23,8 @@ impl SimulationRuntime {
         let (events_tx, _) = broadcast::channel(256);
         Self {
             running: AtomicBool::new(false),
-            interval_ms: AtomicU64::new(1000),
             latest_score: RwLock::new(None),
+            active_game: RwLock::new(None),
             events_tx,
         }
     }
@@ -33,7 +33,21 @@ impl SimulationRuntime {
 #[derive(Debug, Clone, Serialize)]
 pub(crate) struct StatusPayload {
     pub(crate) running: bool,
-    pub(crate) interval_ms: u64,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub(crate) struct GameStatePayload {
+    pub players: Vec<PlayerState>,
+    pub current_player: usize,
+    pub current_dart: u32,
+    pub phase: String,
+    pub winner: Option<usize>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub(crate) struct PlayerState {
+    pub name: String,
+    pub score: u32,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -41,5 +55,7 @@ pub(crate) struct StatusPayload {
 pub(crate) enum ServerEvent {
     Score(ScorePayload),
     Status(StatusPayload),
+    GameState(GameStatePayload),
+    GameOver { winner_index: usize, winner_name: String },
     Error(String),
 }

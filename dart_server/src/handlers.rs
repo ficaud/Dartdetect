@@ -7,7 +7,7 @@ use axum::{
     response::IntoResponse,
     Json,
 };
-use dartdectec::dart_game::ScorePayload;
+use dartdectec::dart_game::{ScorePayload, game::GameSession, x01::X01};
 use serde::Serialize;
 use std::{
     fmt::Debug, sync::{
@@ -21,6 +21,15 @@ use crate::{
 };
 use crate::ws::{ws_connection};
 
+#[derive(serde::Deserialize, Debug)]
+pub(crate) struct StartGameRequest {
+    #[serde(rename = "playersCount")]
+    players_count: u32,
+    #[serde(rename = "startingScore")]
+    starting_score: u32,
+}
+
+
 #[derive(Debug, Serialize)]
 pub(crate) struct HealthResponse {
     status: &'static str,
@@ -28,8 +37,7 @@ pub(crate) struct HealthResponse {
 
 pub(crate) fn status_from_runtime(runtime: &SimulationRuntime) -> StatusPayload {
     StatusPayload {
-        running: runtime.running.load(Ordering::Relaxed),
-        interval_ms: runtime.interval_ms.load(Ordering::Relaxed),
+        running: runtime.running.load(Ordering::Relaxed)
     }
 }
 pub(crate) fn emit_event(runtime: &SimulationRuntime, event: ServerEvent) {
@@ -63,6 +71,25 @@ pub(crate) async fn ws_handler(
     State(state): State<AppState>,
 ) -> impl IntoResponse {
     ws.on_upgrade(move |socket| ws_connection(socket, state))
+}
+
+pub(crate) async fn start_game_handler(
+    State(state): State<AppState>,
+    Json(params): Json<StartGameRequest>,
+) -> Result<StatusCode, ApiError> {
+    println!(
+        "Game start requested: {} players, starting score = {}",
+        params.players_count, params.starting_score
+    );
+
+    let session = GameSession::new(
+        X01::new(params.starting_score, false),
+        (1..=params.players_count).map(|i| format!("Player {}", i)).collect(),
+    );
+
+    *state.runtime.active_game.write().await = Some(session);
+
+    Ok(StatusCode::OK)
 }
 
 pub(crate) async fn version_handler() -> &'static str {

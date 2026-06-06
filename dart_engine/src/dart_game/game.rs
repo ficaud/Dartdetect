@@ -1,6 +1,3 @@
-
-// ─── Shot types ─────────────────────────────────
-
 // Raw result of a dart throw (independent of game type)
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct ShotResult {
@@ -113,7 +110,7 @@ impl<V: GameVariant> GameSession<V> {
     /// - variant: The game variant to be played (e.g. X01, Cricket).
     /// - names: A vector of player names.
     pub fn new(variant: V, names: Vec<String>) -> Self {
-        let players = names
+        let players: Vec<Player<V::PlayerData>> = names
             .into_iter()
             .enumerate()
             .map(|(i, name)| Player {
@@ -123,6 +120,8 @@ impl<V: GameVariant> GameSession<V> {
                 history: vec![],
             })
             .collect();
+
+        println!("Starting new game: {} with players: {}", variant.name(), players.iter().map(|p| p.name.clone()).collect::<Vec<_>>().join(", "));
 
         GameSession {
             variant,
