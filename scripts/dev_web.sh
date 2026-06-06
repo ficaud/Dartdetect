@@ -14,7 +14,7 @@ stop_process_tree() {
 		return
 	fi
 
-	# Stop children first (npm -> node/vite), then parent.
+	# Stop children first (npm -> node/vite), then parent
 	pkill -TERM -P "${pid}" 2>/dev/null || true
 	kill -TERM "${pid}" 2>/dev/null || true
 
@@ -44,7 +44,7 @@ trap cleanup EXIT INT TERM
 echo "Starting dart_server on http://localhost:8080 ..."
 (
 	cd "${ROOT_DIR}"
-	cargo run --manifest-path dart_server/Cargo.toml
+	RUST_LOG=dart_server=debug cargo run --manifest-path dart_server/Cargo.toml
 ) &
 SERVER_PID=$!
 
