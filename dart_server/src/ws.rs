@@ -141,6 +141,11 @@ pub(crate) async fn ws_connection(socket: WebSocket, state: AppState) {
                                         }
 
                                         // Broadcast outside the write lock
+                                        // Always emit Score so the frontend updates the impact dot
+                                        emit_event(
+                                            &runtime_for_receive,
+                                            ServerEvent::Score(payload),
+                                        );
                                         if let Some(state) = &game_state {
                                             tracing::info!(
                                                 "[WS] broadcasting GameState — current_player={}, dart={}/3",

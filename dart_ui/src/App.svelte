@@ -154,44 +154,48 @@
 <main class="page">
   <section class="panel">
     <p class="version-badge">Version: {appVersion}</p>
-    <p class="eyebrow">DartDetect</p>
+    <div class="controls">
+      <p class="eyebrow">DartDetect</p>
 
-    <div class="hero">
-      <h1>501</h1>
-      <p class="lede">
-        The classic darts game. Throw three darts per turn and be the first to reach zero.
-      </p>
+      <div class="hero">
+        <h1>501</h1>
+        <p class="lede">
+          The classic darts game. Throw three darts per turn and be the first to reach zero.
+        </p>
+      </div>
+
+      <div class="game-setup">
+        <label class="field">
+          <span>Number of players</span>
+          <select bind:value={playersCount}>
+            <option value={1}>1 player</option>
+            <option value={2}>2 players</option>
+            <option value={3}>3 players</option>
+            <option value={4}>4 players</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Starting score</span>
+          <select bind:value={startingScore}>
+            <option value={301}>301</option>
+            <option value={501}>501</option>
+            <option value={701}>701</option>
+            <option value={1001}>1001</option>
+          </select>
+        </label>
+
+        <button class="start" on:click={startGame}>
+          Start the game
+        </button>
+      </div>
+
+      {#if errorMessage && !loading}
+        <p class="status error">{errorMessage}</p>
+      {/if}
     </div>
 
-    <div class="game-setup">
-      <label class="field">
-        <span>Number of players</span>
-        <select bind:value={playersCount}>
-          <option value={1}>1 player</option>
-          <option value={2}>2 players</option>
-          <option value={3}>3 players</option>
-          <option value={4}>4 players</option>
-        </select>
-      </label>
-
-      <label class="field">
-        <span>Starting score</span>
-        <select bind:value={startingScore}>
-          <option value={301}>301</option>
-          <option value={501}>501</option>
-          <option value={701}>701</option>
-          <option value={1001}>1001</option>
-        </select>
-      </label>
-
-      <button class="start" on:click={startGame}>
-        Start the game
-      </button>
-    </div>
-
-
-
-      <div class="visuals">
+    <div class="visuals">
         <figure class="board-panel">
           <svg
             aria-label={payload ? `Dart impact at x ${payload.impact_x} and y ${payload.impact_y}` : 'Dartboard'}
@@ -231,29 +235,8 @@
         </figure>
 
         {#if payload}
-        <div class="grid">
-          <article class="card accent">
-            <span>Score</span>
-            <strong>{payload.score}</strong>
-          </article>
-          <article class="card">
-            <span>Impact X</span>
-            <strong>{payload.impact_x}</strong>
-          </article>
-          <article class="card">
-            <span>Impact Y</span>
-            <strong>{payload.impact_y}</strong>
-          </article>
-          <article class="card">
-            <span>Processing time</span>
-            <strong>{payload.processing_time_us} us</strong>
-          </article>
-        </div>
+        <p class="live-score">Score: <strong>{payload.score}</strong></p>
         {/if}
       </div>
-
-    {#if errorMessage && !loading}
-      <p class="status error">{errorMessage}</p>
-    {/if}
   </section>
 </main>
