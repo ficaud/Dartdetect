@@ -63,7 +63,20 @@ async fn main() -> Result<()> {
             continue;
         }
 
-        // Try to parse coordinates: "x, y" or "x,y"
+        // Try to parse as 4 comma-separated values (timings): "t1, t2, t3, t4"
+        let parts: Vec<&str> = line.split(',').map(|s| s.trim()).collect();
+        if parts.len() == 4 && parts[0].parse::<f64>().is_ok() {
+            let t1: f64 = parts[0].parse().unwrap();
+            let t2: f64 = parts[1].parse().unwrap();
+            let t3: f64 = parts[2].parse().unwrap();
+            let t4: f64 = parts[3].parse().unwrap();
+            let cmd = format!(r#"{{"t1": {}, "t2": {}, "t3": {}, "t4": {}}}"#, t1, t2, t3, t4);
+            println!(">> {}", cmd);
+            let _ = write.send(Message::Text(cmd.into())).await;
+            continue;
+        }
+
+        // Try to parse as 2 comma-separated values (coordinates): "x, y"
         if let Some((x_str, y_str)) = line.split_once(',') {
             let x: f64 = match x_str.trim().parse() {
                 Ok(v) => v,
