@@ -26,10 +26,40 @@ pub fn calculate_score_for_impact_point(impact_point: Point) -> Result<u32, Stri
 		],
 	);
 
+	println!(
+		"Simulated imapcts delays (us): t1={}, t2={}, t3={}, t4={}",
+		impact_simulator.t1, impact_simulator.t2, impact_simulator.t3, impact_simulator.t4
+	);
+
 	let reached_impact = locator
 		.locate()
 		.ok_or_else(|| String::from("solver did not find an impact point"))?;
 
 	let mut score = Score::new(reached_impact);
 	Ok(score.get_score())
+}
+
+pub fn calculate_score_for_sensors_timings(t1: f64, t2: f64, t3: f64, t4: f64) -> Result<(Point, u32), String> {
+	let sensors = default_sensors();
+	let locator = ImpactLocator::new(
+		sensors,
+		[
+			t1,
+			t2,
+			t3,
+			t4,
+		],
+	);
+
+	println!(
+		"Received imapcts delays (us): t1={}, t2={}, t3={}, t4={}",
+		t1, t2, t3, t4
+	);
+
+	let reached_impact = locator
+		.locate()	
+		.ok_or_else(|| String::from("solver did not find an impact point"))?;
+
+	let mut score = Score::new(reached_impact);
+	Ok((reached_impact, score.get_score()))
 }

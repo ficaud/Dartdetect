@@ -1,4 +1,4 @@
-use dartdectec::dart_game::{game::GameSession, x01::X01};
+use dartdetect::dart_game::{game::GameSession, x01::X01};
 use serde::Serialize;
 use std::sync::{
     Arc,
@@ -6,9 +6,11 @@ use std::sync::{
 };
 use tokio::sync::{RwLock, broadcast};
 
+
 /// Injected into every Axum route handler — wraps the shared runtime state in an Arc.
 #[derive(Clone)]
 pub(crate) struct AppState {
+    // Shared runtime state of the server, including simulation status, latest score, active game, and event bus.
     pub(crate) runtime: Arc<SimulationRuntime>,
 }
 
@@ -22,15 +24,6 @@ pub(crate) struct SimulationRuntime {
     pub(crate) active_game: RwLock<Option<GameSession<X01>>>,
     /// Broadcast channel that distributes events to all connected WebSocket clients.
     pub(crate) events_tx: broadcast::Sender<ServerEvent>,
-}
-
-
-/// Result of a dart throw: impact coordinates and the points scored.
-#[derive(Debug, Clone, Serialize)]
-pub(crate) struct ScorePayload {
-    pub impact_x: f64,
-    pub impact_y: f64,
-    pub score: u32,
 }
 
 /// Events broadcast through the event bus to all WS clients.
@@ -48,6 +41,14 @@ pub(crate) enum ServerEvent {
     GameOver { winner_index: usize, winner_name: String },
     /// An error occurred.
     Error(String),
+}
+
+/// Result of a dart throw: impact coordinates and the points scored.
+#[derive(Debug, Clone, Serialize)]
+pub(crate) struct ScorePayload {
+    pub impact_x: f64,
+    pub impact_y: f64,
+    pub score: u32,
 }
 
 impl SimulationRuntime {

@@ -248,10 +248,10 @@ dependencies = [
 
 [[package]]
 name = "dart_server"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "axum",
- "dartdectec",
+ "dartdetect",
  "futures-util",
  "serde",
  "serde_json",
@@ -276,7 +276,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "dartdectec"
+name = "dartdetect"
 version = "0.1.0"
 dependencies = [
  "rand",

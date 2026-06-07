@@ -4,9 +4,9 @@ use axum::{
 };
 use tower_http::{cors::CorsLayer, trace::TraceLayer};
 
+// Mainly internal handlers list
 use crate::{
     handlers::{
-        health_handler,
         latest_score_handler,
         status_handler,
         ws_handler,
@@ -16,9 +16,9 @@ use crate::{
     runtime::AppState,
 };
 
+// Defines all the HTTP routes of the server, and their corresponding handler functions.
 pub fn router(state: AppState) -> Router {
     Router::new()
-        .route("/health", get(health_handler))
         .route("/version", get(version_handler))
         .route("/api/status", get(status_handler))
         .route("/api/game/start", post(start_game_handler))

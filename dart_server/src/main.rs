@@ -1,4 +1,5 @@
 mod error;
+mod game_manager;
 mod handlers;
 mod ws;
 mod routes;

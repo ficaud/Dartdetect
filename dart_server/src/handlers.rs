@@ -1,29 +1,26 @@
+// ── Standard library ──
+use std::sync::atomic::Ordering;
+
+// ── External crates ──
 use axum::{
-    extract::{
-        State,
-        ws::WebSocketUpgrade,
-    },
+    extract::{State, ws::WebSocketUpgrade},
     http::StatusCode,
     response::IntoResponse,
     Json,
 };
-use dartdectec::dart_game::{game::GameSession, x01::X01};
-use crate::runtime::ScorePayload;
-use serde::Serialize;
-use std::{
-    fmt::Debug, sync::{
-        atomic::Ordering,
-    }
-};
+use dartdetect::dart_game::{game::GameSession, x01::X01};
 
+// ── Internal modules ──
 use crate::{
     error::ApiError,
     runtime::{
-        AppState, GameStatePayload, PlayerState, ServerEvent, SimulationRuntime, StatusPayload,
+        AppState, GameStatePayload, PlayerState, ScorePayload, ServerEvent,
+        SimulationRuntime, StatusPayload,
     },
+    ws::ws_connection,
 };
-use crate::ws::{ws_connection};
 
+// Structure that store the request body for the "start game" endpoint.
 #[derive(serde::Deserialize, Debug)]
 pub(crate) struct StartGameRequest {
     #[serde(rename = "playersCount")]
@@ -32,21 +29,19 @@ pub(crate) struct StartGameRequest {
     starting_score: u32,
 }
 
-
-#[derive(Debug, Serialize)]
-pub(crate) struct HealthResponse {
-    status: &'static str,
-}
-
+// Handler for the /api/status endpoint: returns the current simulation status.
 pub(crate) fn status_from_runtime(runtime: &SimulationRuntime) -> StatusPayload {
     StatusPayload {
         running: runtime.running.load(Ordering::Relaxed)
     }
 }
+
+// Handler helper that takes runtime and a ServerEvent, and broadcasts the event to all WS clients.
 pub(crate) fn emit_event(runtime: &SimulationRuntime, event: ServerEvent) {
     let _ = runtime.events_tx.send(event);
 }
 
+// Helper that converts a GameSession into a GameStatePayload for broadcasting to WS clients.
 pub(crate) fn game_state_from_session(session: &GameSession<X01>) -> GameStatePayload {
     GameStatePayload {
         players: session
@@ -60,24 +55,22 @@ pub(crate) fn game_state_from_session(session: &GameSession<X01>) -> GameStatePa
         current_player: session.current_player,
         current_dart: session.current_dart,
         phase: match session.phase {
-            dartdectec::dart_game::game::GamePhase::Playing => "playing".into(),
-            dartdectec::dart_game::game::GamePhase::Finished(w) => format!("finished:{}", w),
+            dartdetect::dart_game::game::GamePhase::Playing => "playing".into(),
+            dartdetect::dart_game::game::GamePhase::Finished(w) => format!("finished:{}", w),
         },
         winner: match session.phase {
-            dartdectec::dart_game::game::GamePhase::Finished(w) => Some(w),
+            dartdetect::dart_game::game::GamePhase::Finished(w) => Some(w),
             _ => None,
         },
     }
 }
 
-pub(crate) async fn health_handler() -> Json<HealthResponse> {
-    Json(HealthResponse { status: "ok" })
-}
-
+// Handler that reports the server stateus to the /api/status endpoint.
 pub(crate) async fn status_handler(State(state): State<AppState>) -> Json<StatusPayload> {
     Json(status_from_runtime(&state.runtime))
 }
 
+// Handler for the /api/latest endpoint: returns the most recent score as JSON that includes the impact coordinates and the points scored.
 pub(crate) async fn latest_score_handler(
     State(state): State<AppState>,
 ) -> Result<Json<ScorePayload>, ApiError> {
@@ -92,6 +85,8 @@ pub(crate) async fn latest_score_handler(
     ))
 }
 
+// Handler that iniitiates a WebSocket connection at the /ws/impacts endpoint,
+// and starts sending real-time updates about dart throws, game state, and simulation status to connected clients.
 pub(crate) async fn ws_handler(
     ws: WebSocketUpgrade,
     State(state): State<AppState>,
@@ -99,6 +94,7 @@ pub(crate) async fn ws_handler(
     ws.on_upgrade(move |socket| ws_connection(socket, state))
 }
 
+// Handler for the /api/game/start endpoint: starts a new game session with the specified parameters (number of players, starting score).
 pub(crate) async fn start_game_handler(
     State(state): State<AppState>,
     Json(params): Json<StartGameRequest>,
@@ -124,6 +120,7 @@ pub(crate) async fn start_game_handler(
     Ok(StatusCode::OK)
 }
 
+// Handler for the /version endpoint: returns the current server version from Cargo.toml.
 pub(crate) async fn version_handler() -> &'static str {
     env!("CARGO_PKG_VERSION")
 }

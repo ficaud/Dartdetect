@@ -2,7 +2,7 @@ mod dart_core;
 mod dart_calculator;
 mod dart_game;
 mod dart_interpretor;
-mod dart_simulation;
+mod dart_scoring;
 
 use crate::dart_calculator::Point;
 
