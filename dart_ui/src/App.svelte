@@ -181,16 +181,6 @@
     <section class="panel">
         <p class="version-badge">Version: {appVersion}</p>
         <div class="controls">
-            <p class="eyebrow">DartDetect</p>
-
-            <div class="hero">
-                <h1>501</h1>
-                <p class="lede">
-                    The classic darts game. Throw three darts per turn and be
-                    the first to reach zero.
-                </p>
-            </div>
-
             <div class="game-setup">
                 <label class="field">
                     <span>Number of players</span>
