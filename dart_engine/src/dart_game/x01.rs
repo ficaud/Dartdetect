@@ -1,9 +1,4 @@
-use crate::dart_game::game::
-{
-    GameVariant,
-    ShotResult,
-    ShotOutcome
-};
+use crate::dart_game::game::{GameVariant, ShotOutcome, ShotResult};
 
 // Implementation of the X01 game variant,
 // which includes standard games like 301, 501, etc. with optional double-out rules.
@@ -16,11 +11,11 @@ pub struct X01 {
 // Implementation of the X01 game variant, which includes standard games like 301, 501, etc. with optional double-out rules.
 impl X01 {
     /// Creates a new X01 game variant with the specified starting score and double-out requirement.
-    /// 
+    ///
     /// Arguments:
     /// - starting_score: The initial score that players start with (e.g. 301, 501).
     /// - require_double_out: If true, players must finish on a double to win.
-    /// 
+    ///
     /// Returns an instance of the X01 game variant with the appropriate name based on the starting score.
     pub fn new(starting_score: u32, require_double_out: bool) -> Self {
         Self {
@@ -47,17 +42,21 @@ impl GameVariant for X01 {
     }
 
     /// The number of darts allowed per turn in X01 is typically 3.
-    fn darts_per_turn(&self) -> u32 { 3 }
+    fn darts_per_turn(&self) -> u32 {
+        3
+    }
 
     /// Returns the name of the X01 game variant.
-    fn name(&self) -> &'static str { self.name }
+    fn name(&self) -> &'static str {
+        self.name
+    }
 
     /// Resolves a shot for the X01 game variant, applying the rules for scoring, busts, and double-out if required.
-    /// 
+    ///
     /// Arguments:
     /// - player: A mutable reference to the player's current score (remaining points).
     /// - shot: The result of the dart throw (sector and multiplier).
-    /// 
+    ///
     /// Returns a `ShotOutcome` that includes the score for this shot, whether it was a bust,
     /// if the turn is over, and if the game is finished, along with any relevant messages.
     fn resolve_shot(&self, remaining: &mut u32, shot: ShotResult) -> ShotOutcome {
@@ -93,15 +92,19 @@ impl GameVariant for X01 {
             is_bust: false,
             turn_over: game_over, // a finish ends the turn
             game_over,
-            message: if game_over { Some("Game shot!".into()) } else { None },
+            message: if game_over {
+                Some("Game shot!".into())
+            } else {
+                None
+            },
         }
     }
 
     /// Checks if any player has won the game by reaching exactly 0 points.
-    /// 
+    ///
     /// Arguments:
     /// - players: A slice of player scores (remaining points).
-    /// 
+    ///
     /// Returns an `Option<usize>` with the index of the winning player if there is a winner,
     /// or `None` if no player has won yet.
     fn check_winner(&self, players: &[u32]) -> Option<usize> {
@@ -115,25 +118,31 @@ mod tests {
     use crate::dart_game::game::{GameSession, ShotResult};
 
     fn t(sector: u32) -> ShotResult {
-        ShotResult { sector, multiplier: 3 }
+        ShotResult {
+            sector,
+            multiplier: 3,
+        }
     }
 
     fn d(sector: u32) -> ShotResult {
-        ShotResult { sector, multiplier: 2 }
+        ShotResult {
+            sector,
+            multiplier: 2,
+        }
     }
 
     fn s(sector: u32) -> ShotResult {
-        ShotResult { sector, multiplier: 1 }
+        ShotResult {
+            sector,
+            multiplier: 1,
+        }
     }
 
     /// Simulates a perfect 9-dart finish (501, double out).
     /// Sequence: T20 T20 T20 | T20 T20 T20 | T20 T19 D12
     #[test]
     fn nine_dart_finish() {
-        let mut session = GameSession::new(
-            X01::new(501, true),
-            vec!["Phil Taylor".into()],
-        );
+        let mut session = GameSession::new(X01::new(501, true), vec!["Phil Taylor".into()]);
 
         // Turn 1 — 180
         let outcome = session.apply_shot(t(20));
@@ -154,23 +163,28 @@ mod tests {
         assert!(!outcome.game_over);
 
         // Turn 3 — 141 checkout: T20 T19 D12
-        let outcome = session.apply_shot(t(20));   // 60 → 81 remaining
+        let outcome = session.apply_shot(t(20)); // 60 → 81 remaining
         assert!(!outcome.turn_over);
         assert_eq!(session.players[0].data, 81);
 
-        let outcome = session.apply_shot(t(19));   // 57 → 24 remaining
+        let outcome = session.apply_shot(t(19)); // 57 → 24 remaining
         assert!(!outcome.turn_over);
         assert_eq!(session.players[0].data, 24);
 
-        let outcome = session.apply_shot(d(12));   // D12 → 0
+        let outcome = session.apply_shot(d(12)); // D12 → 0
         assert!(outcome.game_over);
         assert!(outcome.turn_over);
         assert_eq!(outcome.message.as_deref(), Some("Game shot!"));
-        assert_eq!(session.phase, crate::dart_game::game::GamePhase::Finished(0));
+        assert_eq!(
+            session.phase,
+            crate::dart_game::game::GamePhase::Finished(0)
+        );
 
         // Total of 9 darts
         assert_eq!(session.players[0].history.len(), 3);
-        let total_darts: usize = session.players[0].history.iter()
+        let total_darts: usize = session.players[0]
+            .history
+            .iter()
             .map(|t| t.darts.len())
             .sum();
         assert_eq!(total_darts, 9);
@@ -188,10 +202,7 @@ mod tests {
     ///   P1:  T20  T20  D12 → 120 - 120 = 0 🎯
     #[test]
     fn two_player_match() {
-        let mut session = GameSession::new(
-            X01::new(501, true),
-            vec!["Alice".into(), "Bob".into()],
-        );
+        let mut session = GameSession::new(X01::new(501, true), vec!["Alice".into(), "Bob".into()]);
 
         println!("=== Match start: Alice vs Bob (501, double out) ===\n");
 
@@ -264,10 +275,13 @@ mod tests {
 
         // Alice
         println!("Alice:");
-        let _ = session.apply_shot(s(1));  // 41 - 1 = 40
+        let _ = session.apply_shot(s(1)); // 41 - 1 = 40
         let _ = session.apply_shot(d(10)); // 40 - 20 = 20
         let outcome = session.apply_shot(s(20)); // S20 on 20 → bust (not a double)
-        println!("  S1 D10 S20 → BUST! ({} left, needs double)", session.players[0].data);
+        println!(
+            "  S1 D10 S20 → BUST! ({} left, needs double)",
+            session.players[0].data
+        );
         assert!(outcome.is_bust);
         assert_eq!(session.players[0].data, 20);
 
@@ -277,10 +291,12 @@ mod tests {
         let outcome = session.apply_shot(d(12)); // D12 → 0 🎯
         println!("  T19 D12 → 0 🏆 Bob wins!");
         assert!(outcome.game_over);
-        assert_eq!(session.phase, crate::dart_game::game::GamePhase::Finished(1));
+        assert_eq!(
+            session.phase,
+            crate::dart_game::game::GamePhase::Finished(1)
+        );
         assert_eq!(session.players[1].data, 0);
 
         println!("\n=== Match finished: Bob wins ===");
     }
-
 }

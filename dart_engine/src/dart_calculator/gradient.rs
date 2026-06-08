@@ -49,7 +49,12 @@ impl Gradient {
         self.y_epsilon = point;
     }
 
-    pub fn get_new_guess(&mut self, actual_distances: &[f64; 4], old_x: f64, old_y: f64) -> (f64, f64) {
+    pub fn get_new_guess(
+        &mut self,
+        actual_distances: &[f64; 4],
+        old_x: f64,
+        old_y: f64,
+    ) -> (f64, f64) {
         self.old_x = old_x;
         self.old_y = old_y;
         self.prev_error = self.calculate_error(Point::new(old_x, old_y), actual_distances);
@@ -62,7 +67,12 @@ impl Gradient {
         (error_x, error_y)
     }
 
-    pub fn calculate_gradient(&mut self, actual_distances: &[f64; 4], old_x: f64, old_y: f64) -> (f64, f64) {
+    pub fn calculate_gradient(
+        &mut self,
+        actual_distances: &[f64; 4],
+        old_x: f64,
+        old_y: f64,
+    ) -> (f64, f64) {
         let (error_x, error_y) = self.get_new_guess(actual_distances, old_x, old_y);
 
         let gradient_x = (error_x - self.prev_error) / self.epsilon;
@@ -127,7 +137,6 @@ impl DistanceCalculation for Gradient {
             distance_from(&self.sensors[3]),
         ]
     }
-
 }
 
 #[cfg(test)]
@@ -166,14 +175,16 @@ mod tests {
         let first_guess = Point::new(100.0, 250.0);
         let target_point = Point::new(400.0, 250.0);
         let baseline_time_us = 1_000.0;
-        let actual_distances = ImpactSimulator::from_point(&target_point, &sensors, baseline_time_us)
-            .get_distances(Point::new(0.0, 0.0));
-        
+        let actual_distances =
+            ImpactSimulator::from_point(&target_point, &sensors, baseline_time_us)
+                .get_distances(Point::new(0.0, 0.0));
+
         let mut gradient = Gradient::new(0.1, 20.0, sensors);
 
         gradient._set_probe_point(first_guess.x, first_guess.y);
         let base_error = gradient.calculate_error(first_guess, &actual_distances);
-        let (gradient_x, gradient_y) = gradient.calculate_gradient(&actual_distances, first_guess.x, first_guess.y);
+        let (gradient_x, gradient_y) =
+            gradient.calculate_gradient(&actual_distances, first_guess.x, first_guess.y);
         let error_x = gradient.calculate_error(gradient.x_epsilon, &actual_distances);
         let error_y = gradient.calculate_error(gradient.y_epsilon, &actual_distances);
 
@@ -186,6 +197,4 @@ mod tests {
         assert!(gradient_x < 0.0);
         assert!(gradient_y > 0.0);
     }
-
 }
-

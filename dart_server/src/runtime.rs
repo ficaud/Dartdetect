@@ -1,11 +1,7 @@
 use dartdetect::dart_game::{game::GameSession, x01::X01};
 use serde::Serialize;
-use std::sync::{
-    Arc,
-    atomic::AtomicBool,
-};
+use std::sync::{Arc, atomic::AtomicBool};
 use tokio::sync::{RwLock, broadcast};
-
 
 /// Injected into every Axum route handler — wraps the shared runtime state in an Arc.
 #[derive(Clone)]
@@ -38,7 +34,10 @@ pub(crate) enum ServerEvent {
     /// Current state of the active game (players, scores, turn).
     GameState(GameStatePayload),
     /// A player has won the game.
-    GameOver { winner_index: usize, winner_name: String },
+    GameOver {
+        winner_index: usize,
+        winner_name: String,
+    },
     /// An error occurred.
     Error(String),
 }
@@ -51,8 +50,12 @@ pub(crate) struct ScorePayload {
     pub score: u32,
 }
 
+// SimulationRuntime implementation: constructor and helper methods to manage the simulation state, latest score,
+// active game session, and event broadcasting.
 impl SimulationRuntime {
-    
+    /// Creates a new SimulationRuntime with default values: not running, no latest score, no active game, and a broadcast channel for events.
+    ///
+    /// This function initializes the SimulationRuntime struct with an AtomicBool set to false (indicating the simulation is not running),
     pub(crate) fn new() -> Self {
         let (events_tx, _) = broadcast::channel(256);
         Self {

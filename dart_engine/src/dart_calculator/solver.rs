@@ -1,5 +1,4 @@
-use super::{DistanceCalculation, ErrorCalculation, ImpactSimulator, Point, SensorPos, Gradient};
-
+use super::{DistanceCalculation, ErrorCalculation, Gradient, ImpactSimulator, Point, SensorPos};
 
 // Guess point is compose from the Sesnsor positions and another point
 // that will be add to the struct as a guess for the impact point
@@ -25,7 +24,10 @@ impl GuessPoints {
     /// # Returns
     /// A new `GuessPoints` instance with the given sensor positions and an initial guess point at (0, 0).
     pub fn new(sensors: [SensorPos; 4]) -> Self {
-        GuessPoints { sensors, point: Point::new(0.0, 0.0) }
+        GuessPoints {
+            sensors,
+            point: Point::new(0.0, 0.0),
+        }
     }
 
     /// Add a new guess point to the `GuessPoints` struct.
@@ -33,7 +35,7 @@ impl GuessPoints {
     /// # Arguments
     /// - self: The `GuessPoints` instance to which the new guess point will be added.
     /// - point: The new guess point to be added, represented as a `Point` struct containing the x and y coordinates of the guess.
-    /// 
+    ///
     /// This function updates the `point` field of the `GuessPoints` struct.
     pub fn add_guess(&mut self, point: Point) {
         self.point = point;
@@ -49,7 +51,7 @@ impl DistanceCalculation for GuessPoints {
     ///
     /// # Arguments
     /// - self: The `GuessPoints` instance containing the guessed point and sensor positions.
-    /// 
+    ///
     /// This function calculates the distances from the guessed point to each sensor.
     fn get_distances(&self, point: Point) -> Self::Output {
         let x = point.x;
@@ -79,7 +81,7 @@ impl ErrorCalculation for GuessPoints {
     /// # Arguments
     /// - self: The `GuessPoints` instance containing the guessed point and sensor positions.
     /// - actual_distances: An array of the actual distances between the impact point and each sensor, calculated from the simulated timings.
-    /// 
+    ///
     /// This function calculates the L2 error
     fn calculate_error(&self, point: Point, actual_distances: &[f64; 4]) -> Self::Output {
         let x = point.x;
@@ -130,11 +132,11 @@ impl ErrorCalculation for GuessPoints {
 // Solver implementation, which uses the `GuessPoints` and the actual distances to iteratively find the impact point.
 impl Solver {
     /// Calculate the error at a given point by updating the guess and comparing it to the actual distances.
-    /// 
+    ///
     /// # Arguments
     /// - self: The `Solver` instance containing the guess points and actual distances.
     /// - point: The point at which to calculate the error, represented as a `Point` struct containing the x and y coordinates of the point.
-    /// 
+    ///
     /// This function updates the guess point with the provided point and calculates the error using the `calculate_error` method of the `GuessPoints` struct.
     fn error_at(&mut self, point: Point) -> f64 {
         self.guess_points.add_guess(point);
@@ -143,12 +145,12 @@ impl Solver {
     }
 
     /// Search for integer candidate points around the given center point within a specified radius and return the one with the lowest error.
-    ///     
+    ///
     /// # Arguments
     /// - self: The `Solver` instance containing the guess points and actual distances.
     /// - center: The center point around which to search for integer candidate points, represented as a `Point` struct containing the x and y coordinates of the center.
     /// - radius: The radius within which to search for integer candidate points, represented as an `i32` value.
-    /// 
+    ///
     /// This function iterates through integer candidate points around the center point within the specified radius, calculates the error for each candidate point using the `error_at` method,
     /// and returns the candidate point with the lowest error if it is below a certain threshold.
     fn snap_to_integer_candidate(&mut self, center: Point, radius: i32) -> Option<Point> {
@@ -172,24 +174,19 @@ impl Solver {
             }
         }
 
-        if best_error < 1e-6 {
-            best_point
-        } else {
-            None
-        }
+        if best_error < 1e-6 { best_point } else { None }
     }
 
     /// Create a new solver directly from the sensor positions and raw timings.
     pub fn new_from_timings(sensors: [SensorPos; 4], timings_us: [f64; 4]) -> Self {
-        let impact_simulator = ImpactSimulator::new(
-            timings_us[0],
-            timings_us[1],
-            timings_us[2],
-            timings_us[3],
-        );
+        let impact_simulator =
+            ImpactSimulator::new(timings_us[0], timings_us[1], timings_us[2], timings_us[3]);
         let actual_distances = impact_simulator.get_distances(Point::new(0.0, 0.0));
         let guess_points = GuessPoints::new(sensors);
-        Solver { actual_distances, guess_points }
+        Solver {
+            actual_distances,
+            guess_points,
+        }
     }
 
     /// Solve the impact point using the current solver state.
@@ -198,10 +195,10 @@ impl Solver {
     }
 
     /// Iteratively update the guess point with gradient descent to find the impact point.
-    /// 
+    ///
     /// # Arguments
     /// - self: The `Solver` instance containing the actual distances and the guess points.
-    /// 
+    ///
     /// This function updates the current guess with the local gradient.
     /// It uses several starts and a local integer snap search to keep the solver in gradient-only mode.
     pub fn find_impact_point(&mut self) -> Option<Point> {
@@ -252,7 +249,7 @@ impl Solver {
                     return Some(point);
                 }
 
-                // Calculate the gradient at the current guess point and update the guess point in the direction of the negative gradient. 
+                // Calculate the gradient at the current guess point and update the guess point in the direction of the negative gradient.
                 let (gradient_x, gradient_y) = gradient.calculate_gradient(
                     &self.actual_distances,
                     current_guess.x,
@@ -315,7 +312,9 @@ impl Solver {
 
 #[cfg(test)]
 mod tests {
-    use super::{DistanceCalculation, ErrorCalculation, GuessPoints, ImpactSimulator, Point, SensorPos};
+    use super::{
+        DistanceCalculation, ErrorCalculation, GuessPoints, ImpactSimulator, Point, SensorPos,
+    };
 
     #[test]
     fn main_like_flow_runs_in_module_test_suite() {
@@ -413,5 +412,4 @@ mod tests {
         let error = guess_point.calculate_error(guess_point.point, &actual_distances);
         assert!(error > 0.0);
     }
-
 }

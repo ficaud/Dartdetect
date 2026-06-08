@@ -1,5 +1,5 @@
-use super::{Point, SensorPos};
 use super::solver::Solver;
+use super::{Point, SensorPos};
 
 /// Reusable entry point for locating impacts with a fixed sensor layout.
 pub struct ImpactLocator {
@@ -14,17 +14,20 @@ impl ImpactLocator {
     /// # Arguments
     /// - sensors: An array of `SensorPos` representing the positions of the four sensors.
     /// - timings_us: An array of `f64` representing the timings in microseconds.
-    /// 
+    ///
     /// This function initializes the `ImpactLocator` with the provided sensor positions and timings, allowing it to later calculate the impact point using the `locate` method.
     pub fn new(sensors: [SensorPos; 4], timings_us: [f64; 4]) -> Self {
-        ImpactLocator { sensors, timings_us }
+        ImpactLocator {
+            sensors,
+            timings_us,
+        }
     }
 
     /// Locate the impact point based on the sensor position and impact timings.
     ///
     /// # Arguments
     /// - self: The `ImpactLocator` instance containing the sensor positions and timings.
-    /// 
+    ///
     /// This function uses the `Solver` to calculate the impact point based on the provided sensor positions and impact timings.
     pub fn locate(&self) -> Option<Point> {
         Solver::new_from_timings(self.sensors, self.timings_us).solve()
@@ -56,12 +59,12 @@ mod tests {
         let impact_point = Point::new(impact_x, impact_y);
         println!(
             "Target impact point: ({}, {})",
-            impact_point.x as u32,
-            impact_point.y as u32
+            impact_point.x as u32, impact_point.y as u32
         );
 
         let baseline_time_us = 1_000.0;
-        let impact_simulator = ImpactSimulator::from_point(&impact_point, &sensors, baseline_time_us);
+        let impact_simulator =
+            ImpactSimulator::from_point(&impact_point, &sensors, baseline_time_us);
         let locator = ImpactLocator::new(
             sensors,
             [

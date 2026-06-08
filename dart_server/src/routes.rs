@@ -1,22 +1,25 @@
-
 use axum::{
-    Router, routing::{get, post}
+    Router,
+    routing::{get, post},
 };
 use tower_http::{cors::CorsLayer, trace::TraceLayer};
 
 // Mainly internal handlers list
 use crate::{
     handlers::{
-        latest_score_handler,
-        status_handler,
-        ws_handler,
-        version_handler,
-        start_game_handler,
+        latest_score_handler, start_game_handler, status_handler, version_handler, ws_handler,
     },
     runtime::AppState,
 };
 
-// Defines all the HTTP routes of the server, and their corresponding handler functions.
+/// Defines the main router for the application, mapping HTTP endpoints to their respective handlers,
+/// and applying necessary middleware layers (CORS, tracing).
+///
+/// # Arguments
+/// - `state`: The shared application state containing the simulation runtime, passed to handlers via Axum's state management.
+///
+/// # Returns
+/// - `Router`: The configured Axum router with all routes and middleware applied, ready to be served by the application.
 pub fn router(state: AppState) -> Router {
     Router::new()
         .route("/version", get(version_handler))

@@ -6,8 +6,15 @@ use dartdetect::{
     dart_interpretor::score::Score,
 };
 
-/// Applies a dart throw at coordinates (x, y) to the active game session.
-/// Returns `None` if no game is active, or `Some((game_state, (winner_index, winner_name)))` otherwise.
+/// Applies a shot to the active game session if it exists, returning the updated game state and optional game over info.
+///
+/// # Aruments
+/// - `runtime`: reference to the simulation runtime, used to access the active game session.
+/// - `x`, `y`: coordinates of the shot impact, used to derive the shot result (sector + multiplier).
+///
+/// # Returns
+/// - `Some((GameStatePayload, Option<(usize, String)>))` if a game session is active,
+/// containing the updated game state and optional game over info (winner index and name)
 pub(crate) async fn apply_shot(
     runtime: &SimulationRuntime,
     x: f64,
@@ -42,7 +49,16 @@ pub(crate) async fn apply_shot(
     Some((game_state, game_over))
 }
 
-/// Handles the common post-impact flow: save score, apply shot if game active, return events to broadcast.
+/// Processes a dart impact by calculating the score, updating the latest score in the runtime,
+/// and generating the corresponding server events.
+///
+/// # Arguments
+/// - `runtime`: reference to the simulation runtime, used to access the active game session.
+/// - `impact_x`, `impact_y`: coordinates of the dart impact.
+/// - `score`: calculated score for the impact.
+///
+/// # Returns
+/// - A vector of `ServerEvent` instances representing the events to be broadcasted.
 pub(crate) async fn process_impact(
     runtime: &SimulationRuntime,
     impact_x: f64,

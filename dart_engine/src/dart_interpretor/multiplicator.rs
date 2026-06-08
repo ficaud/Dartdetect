@@ -19,7 +19,7 @@ const BLACK_BORDER_RADIUS: f32 = 225.0;
 ///
 /// # Arguments
 /// - radius: A `f32` value representing the distance from the center of the dartboard.
-/// 
+///
 /// This function determines the `MultiplierKind` based on the dartboard's scoring zones,
 /// such as single, double, and triple areas, as well as the bullseye and black border zones.
 fn multiplier_kind_from_radius(radius: f32) -> MultiplierKind {
@@ -89,4 +89,3 @@ mod tests {
         assert_eq!(multiplier_from_radius(230.0), 0);
     }
 }
-

@@ -1,13 +1,12 @@
-use crate::dart_core::Point;
-use crate::dart_game::game::ShotResult;
 use super::multiplicator::multiplier_from_radius;
 use super::zone::sector_from_angle;
+use crate::dart_core::Point;
+use crate::dart_game::game::ShotResult;
 
 const BOARD_CENTER_X: f64 = 250.0;
 const BOARD_CENTER_Y: f64 = 250.0;
 const DOUBLE_BULL_RADIUS: f64 = 6.35;
 const SINGLE_BULL_RADIUS: f64 = 15.9;
-
 
 /// Represents the score of a single dart throw,
 /// including the points scored and the coordinates of the impact on the board
@@ -22,7 +21,7 @@ impl Score {
     ///
     /// # Arguments
     /// - impact_coordinates: A `Point` struct representing the x and y coordinates of the dart's impact on the board.
-    /// 
+    ///
     /// This function initializes a `Score` instance with the provided impact coordinates and a default points.
     pub fn new(impact_coordinates: Point) -> Self {
         Score {
@@ -53,7 +52,7 @@ impl Score {
 
     /// Calculate the score based on the impact coordinates.
     ///
-    /// This function determines the score by calculating the distance from the center of the board and the 
+    /// This function determines the score by calculating the distance from the center of the board and the
     /// angle of the impact point, then applying the appropriate multipliers and sector values to compute the final score.
     pub fn get_score(&mut self) -> u32 {
         let centered = self.centered_coordinates();
@@ -87,12 +86,18 @@ impl Score {
 
         if radius <= DOUBLE_BULL_RADIUS {
             self.points = 50;
-            return ShotResult { sector: 25, multiplier: 2 };
+            return ShotResult {
+                sector: 25,
+                multiplier: 2,
+            };
         }
 
         if radius <= SINGLE_BULL_RADIUS {
             self.points = 25;
-            return ShotResult { sector: 25, multiplier: 1 };
+            return ShotResult {
+                sector: 25,
+                multiplier: 1,
+            };
         }
 
         let multiplier = multiplier_from_radius(radius as f32);
@@ -155,7 +160,13 @@ mod tests {
         let mut score = Score::new(Point::new(250.0, 250.0));
         let result = score.get_shortresult();
 
-        assert_eq!(result, ShotResult { sector: 25, multiplier: 2 });
+        assert_eq!(
+            result,
+            ShotResult {
+                sector: 25,
+                multiplier: 2
+            }
+        );
         assert_eq!(score.points, 50);
     }
 
@@ -164,7 +175,13 @@ mod tests {
         let mut score = Score::new(Point::new(260.0, 250.0));
         let result = score.get_shortresult();
 
-        assert_eq!(result, ShotResult { sector: 25, multiplier: 1 });
+        assert_eq!(
+            result,
+            ShotResult {
+                sector: 25,
+                multiplier: 1
+            }
+        );
         assert_eq!(score.points, 25);
     }
 
@@ -173,7 +190,13 @@ mod tests {
         let mut score = Score::new(Point::new(250.0, 300.0));
         let result = score.get_shortresult();
 
-        assert_eq!(result, ShotResult { sector: 20, multiplier: 1 });
+        assert_eq!(
+            result,
+            ShotResult {
+                sector: 20,
+                multiplier: 1
+            }
+        );
         assert_eq!(score.points, 20);
     }
 
@@ -182,7 +205,13 @@ mod tests {
         let mut score = Score::new(Point::new(350.0, 250.0));
         let result = score.get_shortresult();
 
-        assert_eq!(result, ShotResult { sector: 6, multiplier: 3 });
+        assert_eq!(
+            result,
+            ShotResult {
+                sector: 6,
+                multiplier: 3
+            }
+        );
         assert_eq!(score.points, 18);
     }
 
@@ -191,7 +220,13 @@ mod tests {
         let mut score = Score::new(Point::new(480.0, 250.0));
         let result = score.get_shortresult();
 
-        assert_eq!(result, ShotResult { sector: 6, multiplier: 0 });
+        assert_eq!(
+            result,
+            ShotResult {
+                sector: 6,
+                multiplier: 0
+            }
+        );
         assert_eq!(score.points, 0);
     }
 }

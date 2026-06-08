@@ -7,7 +7,11 @@ use tokio_tungstenite::tungstenite::Message;
 use url::Url;
 
 #[derive(Parser, Debug)]
-#[command(author, version, about = "Interactive CLI that can send messages over WebSocket")]
+#[command(
+    author,
+    version,
+    about = "Interactive CLI that can send messages over WebSocket"
+)]
 struct Args {
     /// Server WebSocket URL
     #[arg(short, long, default_value = "ws://127.0.0.1:8080/ws/impacts")]
@@ -70,7 +74,10 @@ async fn main() -> Result<()> {
             let t2: f64 = parts[1].parse().unwrap();
             let t3: f64 = parts[2].parse().unwrap();
             let t4: f64 = parts[3].parse().unwrap();
-            let cmd = format!(r#"{{"t1": {}, "t2": {}, "t3": {}, "t4": {}}}"#, t1, t2, t3, t4);
+            let cmd = format!(
+                r#"{{"t1": {}, "t2": {}, "t3": {}, "t4": {}}}"#,
+                t1, t2, t3, t4
+            );
             println!(">> {}", cmd);
             let _ = write.send(Message::Text(cmd.into())).await;
             continue;

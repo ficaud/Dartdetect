@@ -27,7 +27,7 @@ impl ImpactSimulator {
     /// - impact: The point of impact to simulate
     /// - sensors: An array of sensor positions
     /// - baseline_time_us: The baseline time in microseconds to add to the calculated timings
-    /// 
+    ///
     /// This function calculates the timings for each sensor based on the distance from the impact point to each sensor
     pub fn from_point(impact: &Point, sensors: &[SensorPos; 4], baseline_time_us: f64) -> Self {
         let to_time = |sensor: &SensorPos| {
@@ -53,7 +53,7 @@ impl DistanceCalculation for ImpactSimulator {
     ///
     /// # Arguments
     /// - self: The `ImpactSimulator` instance containing the simulated timings for each sensor.
-    /// 
+    ///
     /// This function return the four distances in millimeters corresponding to the timings of the sensors
     fn get_distances(&self, _point: Point) -> Self::Output {
         // First get the delta value from the timiings finding the minimum timing and then subtracting it from all the timings

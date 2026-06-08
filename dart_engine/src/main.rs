@@ -1,11 +1,10 @@
-mod dart_core;
 mod dart_calculator;
+mod dart_core;
 mod dart_game;
 mod dart_interpretor;
 mod dart_scoring;
 
 use crate::dart_calculator::Point;
-
 
 // ----------------------------------------------------------------
 // Solver performance notes

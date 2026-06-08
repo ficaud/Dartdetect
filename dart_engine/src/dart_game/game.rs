@@ -8,7 +8,7 @@ pub struct ShotResult {
 // Shot result methods
 impl ShotResult {
     /// Calculates the total points scored by this shot.
-    /// 
+    ///
     /// Return 0 for invalid shots (e.g. multiplier > 3, sector out of range).
     pub fn points(&self) -> u32 {
         self.sector * self.multiplier
@@ -60,33 +60,37 @@ pub trait GameVariant: Send {
     type PlayerData: Clone + Send;
 
     /// Initializes player data at the start of the game
-    /// 
+    ///
     /// Return the initial data for a player (e.g. starting score for X01).
     fn init_player_data(&self) -> Self::PlayerData;
 
     /// Number of darts allowed per turn (default: 3)
-    /// 
+    ///
     /// Return the number of darts each player can throw in a single turn.
-    fn darts_per_turn(&self) -> u32 { 3 }
+    fn darts_per_turn(&self) -> u32 {
+        3
+    }
 
     /// Maximum number of players allowed (default: 4)
-    /// 
+    ///
     /// Return the maximum number of players that can participate in this game variant.
-    fn max_players(&self) -> u32 { 4 }
+    fn max_players(&self) -> u32 {
+        4
+    }
 
     /// Name of the game variant (e.g. "X01", "Cricket")
-    /// 
+    ///
     /// Return a human-readable name for this game variant, used in UI and summaries.
     fn name(&self) -> &'static str;
 
     /// Resolves a shot against the player's data and returns the outcome.
-    /// 
+    ///
     /// This is where the core game logic lives: calculating scores, checking for busts,
     /// determining if the turn or game is over, and returning any relevant messages.
     fn resolve_shot(&self, player: &mut Self::PlayerData, shot: ShotResult) -> ShotOutcome;
 
     /// Checks if any player has won the game based on their data.
-    /// 
+    ///
     /// This is used to determine if the game has ended after a shot is applied.
     fn check_winner(&self, _players: &[Self::PlayerData]) -> Option<usize> {
         None
@@ -95,17 +99,17 @@ pub trait GameVariant: Send {
 
 // Game session struct that manages the state of an ongoing game, including players, current turn, and phase
 pub struct GameSession<V: GameVariant> {
-    pub variant: V,                             // The game variant being played (e.g. X01, Cricket)
-    pub players: Vec<Player<V::PlayerData>>,    // List of players with their data and history
-    pub current_player: usize,                  // Index of the current player in the players vector
-    pub current_dart: u32,                      // 0..V::darts_per_turn()
-    pub phase: GamePhase,                       // Current phase of the game (playing, finished)
+    pub variant: V, // The game variant being played (e.g. X01, Cricket)
+    pub players: Vec<Player<V::PlayerData>>, // List of players with their data and history
+    pub current_player: usize, // Index of the current player in the players vector
+    pub current_dart: u32, // 0..V::darts_per_turn()
+    pub phase: GamePhase, // Current phase of the game (playing, finished)
 }
 
 // Implementation of game session methods, including applying shots, advancing turns, and summarizing state
 impl<V: GameVariant> GameSession<V> {
     /// Creates a new game session with the specified variant and player names.
-    /// 
+    ///
     /// Arguments:
     /// - variant: The game variant to be played (e.g. X01, Cricket).
     /// - names: A vector of player names.
@@ -121,7 +125,15 @@ impl<V: GameVariant> GameSession<V> {
             })
             .collect();
 
-        println!("Starting new game: {} with players: {}", variant.name(), players.iter().map(|p| p.name.clone()).collect::<Vec<_>>().join(", "));
+        println!(
+            "Starting new game: {} with players: {}",
+            variant.name(),
+            players
+                .iter()
+                .map(|p| p.name.clone())
+                .collect::<Vec<_>>()
+                .join(", ")
+        );
 
         GameSession {
             variant,
@@ -133,10 +145,10 @@ impl<V: GameVariant> GameSession<V> {
     }
 
     /// Applies a shot for the current player and updates the game state accordingly.
-    /// 
+    ///
     /// Aruments:
     /// - shot: The result of the dart throw (sector and multiplier).
-    /// 
+    ///
     /// Return a `ShotOutcome` that includes the score for this shot, whether it was a bust, if the turn is over, and if the game is finished.
     pub fn apply_shot(&mut self, shot: ShotResult) -> ShotOutcome {
         if !matches!(self.phase, GamePhase::Playing) {
@@ -178,16 +190,13 @@ impl<V: GameVariant> GameSession<V> {
 
         // Check for game over
         if outcome.game_over
-            || self
-                .variant
-                .check_winner(
-                    &self
-                        .players
-                        .iter()
-                        .map(|p| p.data.clone())
-                        .collect::<Vec<_>>(),
-                )
-                == Some(self.current_player)
+            || self.variant.check_winner(
+                &self
+                    .players
+                    .iter()
+                    .map(|p| p.data.clone())
+                    .collect::<Vec<_>>(),
+            ) == Some(self.current_player)
         {
             self.phase = GamePhase::Finished(self.current_player);
             return ShotOutcome {
@@ -209,7 +218,7 @@ impl<V: GameVariant> GameSession<V> {
     }
 
     /// Advances the game to the next player's turn, resetting the dart count.
-    /// 
+    ///
     /// REturn nothing, but update the `current_player` index and reset `current_dart` to 0.
     fn advance_to_next_player(&mut self) {
         let next = (self.current_player + 1) % self.players.len();
@@ -218,7 +227,7 @@ impl<V: GameVariant> GameSession<V> {
     }
 
     /// Checks if the current player's turn is over based on the number of darts thrown.
-    /// 
+    ///
     /// Return true if the current player has thrown the maximum number of darts for their turn, false otherwise.
     pub fn is_turn_over(&self) -> bool {
         self.current_dart >= self.variant.darts_per_turn()
