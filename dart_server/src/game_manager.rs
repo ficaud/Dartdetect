@@ -1,4 +1,4 @@
-use crate::handlers::{emit_event, game_state_from_session};
+use crate::handlers::game_state_from_session;
 use crate::runtime::{GameStatePayload, ScorePayload, ServerEvent, SimulationRuntime};
 use dartdetect::{
     dart_core::Point,
@@ -42,13 +42,13 @@ pub(crate) async fn apply_shot(
     Some((game_state, game_over))
 }
 
-/// Handles the common post-impact flow: save score, apply shot if game active, broadcast events.
+/// Handles the common post-impact flow: save score, apply shot if game active, return events to broadcast.
 pub(crate) async fn process_impact(
     runtime: &SimulationRuntime,
     impact_x: f64,
     impact_y: f64,
     score: u32,
-) {
+) -> Vec<ServerEvent> {
     let score_payload = ScorePayload {
         impact_x,
         impact_y,
@@ -61,22 +61,23 @@ pub(crate) async fn process_impact(
         *latest = Some(score_payload.clone());
     }
 
+    let mut events = Vec::new();
+
     // Check if a game is active
     if let Some((game_state, game_over)) = apply_shot(runtime, impact_x, impact_y).await {
         // Always emit Score so the frontend updates the impact dot
-        emit_event(runtime, ServerEvent::Score(score_payload));
-        emit_event(runtime, ServerEvent::GameState(game_state));
+        events.push(ServerEvent::Score(score_payload));
+        events.push(ServerEvent::GameState(game_state));
 
         if let Some((idx, name)) = game_over {
-            emit_event(
-                runtime,
-                ServerEvent::GameOver {
-                    winner_index: idx,
-                    winner_name: name,
-                },
-            );
+            events.push(ServerEvent::GameOver {
+                winner_index: idx,
+                winner_name: name,
+            });
         }
     } else {
-        emit_event(runtime, ServerEvent::Score(score_payload));
+        events.push(ServerEvent::Score(score_payload));
     }
+
+    events
 }
