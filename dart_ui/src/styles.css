@@ -406,3 +406,76 @@ button {
 .secondary:hover:not(:disabled) {
     background: rgba(255, 255, 255, 0.12);
 }
+
+@media (max-width: 768px) {
+    .page {
+        height: auto;
+        min-height: 100dvh;
+        padding: 12px;
+    }
+
+    .panel {
+        flex-direction: column;
+        height: auto;
+        min-height: 0;
+        padding: 20px;
+        gap: 20px;
+        border-radius: 18px;
+    }
+
+    .controls {
+        flex: none;
+        width: 100%;
+        align-self: auto;
+        gap: 12px;
+    }
+
+    .game-setup {
+        flex-direction: column;
+        padding: 18px;
+    }
+
+    .game-setup .field {
+        flex: none;
+        width: 100%;
+    }
+
+    .start {
+        width: 100%;
+    }
+
+    .board-panel {
+        flex: none;
+        min-height: 280px;
+    }
+
+    .version-badge {
+        top: 12px;
+        right: 14px;
+        font-size: 0.65rem;
+    }
+
+    .player-scores {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .player-score {
+        flex: 1;
+        min-width: 140px;
+    }
+
+    .score-popup {
+        font-size: 1.2rem;
+        padding: 8px 16px;
+    }
+
+    .live-score {
+        font-size: 0.85rem;
+    }
+
+    .live-score strong {
+        font-size: 1.2rem;
+    }
+}
