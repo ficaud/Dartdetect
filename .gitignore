@@ -6,3 +6,5 @@
 /dart_ui/dist
 dart_simu_cli/target
 dart_ui/.vite
+*.timestamp-*
+NOTES.md
